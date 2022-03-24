@@ -20,7 +20,7 @@ def load_images():
 
 
 # draw game state
-def draw_game_state(screen,board):
+def draw_game_state(screen, board):
     draw_board(screen)
     draw_pieces(screen, board)
 
@@ -52,10 +52,29 @@ if __name__ == "__main__":
     screen.fill(pygame.Color("white"))
     gs = ChessEngine.GameState()
     running = True
+    sq_selected = ()  # không có ô nào dc chọn, theo doi khi nguòi chơi click (row,col)
+    player_click = []  # theo dõi khi người chơi nhấp vào ( [(4,6),(4,4)]
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                location = pygame.mouse.get_pos()  # (x,y)
+                col = int(location[0] // sq_size) # dấu // : chia làm tròn xuống , đổi thành số nguyên
+                row = int(location[1] // sq_size)
+                if sq_selected == (row, col):  # nếu người chơi click 1 ô 2 lần, reset click mouse
+                    sq_selected = ()
+                    player_click = []
+                else:
+                    sq_selected = (row, col)
+                    player_click.append(sq_selected)
+                    # print(player_click)
+                if len(player_click) == 2:  # sau khi click 2 lần
+                    move = ChessEngine.Move(player_click[0], player_click[1], gs.board)
+                    print(move.get_chess_notation())
+                    gs.make_move(move)
+                    sq_selected = ()  # reset user clicks
+                    player_click = []
         draw_game_state(screen, gs.board)
         clock.tick(max_FPS)  # fps
         pygame.display.flip()
