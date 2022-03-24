@@ -12,7 +12,7 @@ class GameState():
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
-            ["wR", "wN", "wB", "wK", "wQ", "wB", "wN", "wR"],
+            ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"],
         ]
         # lượt đi của quân trắng
         self.whiteToMove = True
@@ -24,13 +24,14 @@ class GameState():
         self.board[move.endRow][move.endCol] = move.piece_move  # gắn vị trí mới cho quân cờ
         self.moveLog.append(move)  # thêm vào log để undo it later
         self.whiteToMove = not self.whiteToMove  # hết lượt quân trắng, lượt quân đen đi
-    # if check in make_move:
-    #     def makeMove(self, move):
-    #         if self.board[move.startRow][move.startCol] != '--':
-    #             self.board[move.startRow][move.startCol] = '--'
-    #             self.board[move.endRow][move.endCol] = move.pieceMoved
-    #             self.moveLog.append(move)
-    #             self.whiteToMove = not self.whiteToMove
+
+    def undo_move(self):
+        if len(self.moveLog) != 0:
+            move = self.moveLog.pop()
+            self.board[move.startRow][
+                move.startCol] = move.piece_move
+            self.board[move.endRow][move.endCol] = move.piece_captured
+            self.whiteToMove = not self.whiteToMove  # đổi lượt
 
 
 class Move():
@@ -50,7 +51,7 @@ class Move():
         self.piece_captured = board[self.endRow][self.endCol]  # ảnh chụp tạo độ sau khi di chuyển( để undo nước đi)
 
     def get_chess_notation(self):  # toạ độ theo kí hiệu nước đi ( D1 : D3 ) // Tốt D1 lên Tốt D3
-        return self.get_rank_files(self.startRow, self.startCol) + ":" + self.get_rank_files(self.endRow, self.endCol)
+        return self.get_rank_files(self.startRow, self.startCol) + self.get_rank_files(self.endRow, self.endCol)
 
     def get_rank_files(self, row, col):  # toạ độ theo kí hiệu ( A1)
         return self.columns_to_file[col] + self.rows_to_ranks[row]

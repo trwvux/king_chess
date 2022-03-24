@@ -58,6 +58,9 @@ if __name__ == "__main__":
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.KEYDOWN: #  undo bằng phím z
+                if event.key == pygame.K_z:
+                    gs.undo_move()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 location = pygame.mouse.get_pos()  # (x,y)
                 col = int(location[0] // sq_size) # dấu // : chia làm tròn xuống , đổi thành số nguyên
