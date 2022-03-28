@@ -27,7 +27,7 @@ def draw_game_state(screen, board):
 
 # draw board
 def draw_board(screen):
-    colors = [(pygame.Color("white")), (pygame.Color("gray"))]
+    colors = [(pygame.Color("white")), (pygame.Color("light green"))]
     for row in range(dimension):
         for column in range(dimension):
             color = colors[(row + column) % 2]
@@ -51,6 +51,8 @@ if __name__ == "__main__":
     pygame.display.set_icon(images['bN'])
     screen.fill(pygame.Color("white"))
     gs = ChessEngine.GameState()
+    valid_moves = gs.get_valid_moves()
+    moves_made = True  # biến cờ để check xem đã kết thúc lượt chưa
     running = True
     sq_selected = ()  # không có ô nào dc chọn, theo doi khi nguòi chơi click (row,col)
     player_click = []  # theo dõi khi người chơi nhấp vào ( [(4,6),(4,4)]
@@ -58,12 +60,13 @@ if __name__ == "__main__":
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.KEYDOWN: #  undo bằng phím z
+            elif event.type == pygame.KEYDOWN:  # undo bằng phím z
                 if event.key == pygame.K_z:
                     gs.undo_move()
+                    moves_made = True
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 location = pygame.mouse.get_pos()  # (x,y)
-                col = int(location[0] // sq_size) # dấu // : chia làm tròn xuống , đổi thành số nguyên
+                col = int(location[0] // sq_size)  # dấu // : chia làm tròn xuống , đổi thành số nguyên
                 row = int(location[1] // sq_size)
                 if sq_selected == (row, col):  # nếu người chơi click 1 ô 2 lần, reset click mouse
                     sq_selected = ()
@@ -75,9 +78,14 @@ if __name__ == "__main__":
                 if len(player_click) == 2:  # sau khi click 2 lần
                     move = ChessEngine.Move(player_click[0], player_click[1], gs.board)
                     print(move.get_chess_notation())
-                    gs.make_move(move)
+                    if move in valid_moves:
+                        gs.make_move(move)
+                        moves_made = True
                     sq_selected = ()  # reset user clicks
                     player_click = []
+        if moves_made:
+            valid_moves = gs.get_valid_moves()
+            moves_made = False
         draw_game_state(screen, gs.board)
         clock.tick(max_FPS)  # fps
         pygame.display.flip()

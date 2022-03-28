@@ -10,7 +10,7 @@ class GameState():
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
-            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "bP", "--", "--", "--", "--", "--"],
             ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"],
         ]
@@ -33,6 +33,62 @@ class GameState():
             self.board[move.endRow][move.endCol] = move.piece_captured
             self.whiteToMove = not self.whiteToMove  # đổi lượt
 
+    # ALl moves considering checks
+    def get_valid_moves(self):
+        return self.get_all_possible_moves()
+
+    # ALl moves without considering checks
+    def get_all_possible_moves(self):
+        moves = []
+        for row in range(8):
+            for col in range(8):
+                turn = self.board[row][col][0]
+                if (turn == "w" and self.whiteToMove) or (turn == "b" and not self.whiteToMove):
+                    piece = self.board[row][col][1]
+                    if piece == "P":
+                        self.get_pawn_moves(row, col, moves)
+                    elif piece == "R":
+                        self.get_rook_move(row, col, moves)
+                    elif piece == "N":
+                        self.get_knight_move(row, col, moves)
+                    elif piece == "B":
+                        self.get_bishop_moves(row, col, moves)
+                    elif piece == "Q":
+                        self.get_queen_moves(row, col, moves)
+                    elif piece == "K":
+                        self.get_king_moves(row, col, moves)
+        return moves
+
+    def get_pawn_moves(self, row, col, move):  # quy tắc đi của quân tốt
+        if self.whiteToMove:
+            if self.board[row - 1][col] == "--":
+                move.append(Move((row, col), (row - 1, col), self.board))
+                if row == 6 and self.board[row - 2][col] == "--":
+                    move.append(Move((row, col), (row - 2, col), self.board))
+            if col - 1 >= 0: # ăn quân bên trái
+                if self.board[row - 1][col - 1][0] == 'b':
+                    move.append(Move((row, col), (row - 1, col - 1), self.board))
+            if col + 1 < 7: #ăn quân bên phải
+                if self.board[row - 1][col + 1][0] == 'b':
+                    move.append(Move((row, col), (row - 1, col + 1), self.board))
+        else:  # black move
+            pass
+
+    def get_rook_move(self, row, col, move):  # quy tắc đi của quân xe
+        pass
+
+    def get_bishop_moves(self, row, col, move):  # quy tắc đi của quân mã
+        pass
+
+    def get_knight_move(self, row, col, move):  # quy tắc đi của quân tượng
+        pass
+
+    def get_queen_moves(self, row, col, move):  # quy tắc đi của quân hậu
+        pass
+
+    def get_king_moves(self, row, col, move):  # quy tắc đi của quân vua
+        pass
+
 
 class Move():
     # maps key to value
@@ -49,6 +105,13 @@ class Move():
         self.endCol = endSq[1]  # toạ độ hàng của lần click thứ hai
         self.piece_move = board[self.startRow][self.startCol]  # vị trí quân cờ đc chọn để di chuyển
         self.piece_captured = board[self.endRow][self.endCol]  # ảnh chụp tạo độ sau khi di chuyển( để undo nước đi)
+        self.move_id = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol
+
+    # Overriding the equal method
+    def __eq__(self, other):
+        if (isinstance(other, Move)):
+            return self.move_id == other.move_id
+        return False
 
     def get_chess_notation(self):  # toạ độ theo kí hiệu nước đi ( D1 : D3 ) // Tốt D1 lên Tốt D3
         return self.get_rank_files(self.startRow, self.startCol) + self.get_rank_files(self.endRow, self.endCol)
